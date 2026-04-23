@@ -11,7 +11,7 @@ Say goodbye to manually creating folder structures! Just paste your ASCII tree a
 
 ![TreeZip Demo](Demo.png)
 
-**Live Demo:** [Try TreeZip Now](https://microresearch-corporation.github.io/TreeZip/)
+**Live Demo:** [Try TreeZip Now](https://mainroute-core.github.io/TreeZip/)
 
 ---
 
@@ -324,7 +324,7 @@ Contributions are welcome! Here's how you can help:
 
 **Your Name**
 
-- GitHub: [@MicroResearch-Corporation](https://github.com/MicroResearch-Corporation/TreeZip)
+- GitHub: [@MainRoute-Core](https://github.com/MainRoute-Core/TreeZip)
 
 ---
 
