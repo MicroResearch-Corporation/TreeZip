@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ASCII Tree → ZIP SaaS Tool</title>
+
+<style>
+:root{
+  --bg:#070b14;
+  --bg2:#0b1220;
+  --panel:#0e1629;
+  --panel2:#111b30;
+  --line:#20304f;
+  --text:#e5edf8;
+  --muted:#8ca0bb;
+  --accent:#60a5fa;
+  --accent2:#22c55e;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --chip:#16233d;
+  --shadow: 0 18px 50px rgba(0,0,0,.32);
+  --radius:18px;
+  --radius2:14px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1000px 600px at 20% 0%, rgba(96,165,250,.11), transparent 50%),
+    radial-gradient(800px 500px at 100% 20%, rgba(34,197,94,.08), transparent 45%),
+    linear-gradient(180deg, var(--bg), #050810 70%);
+  color:var(--text);
+  font-family:var(--sans);
+  overflow:hidden;
+}
+
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+svg{display:block}
+
+.shell{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 18px;
+  border-bottom:1px solid rgba(130,160,200,.12);
+  background:rgba(7,11,20,.72);
+  backdrop-filter: blur(14px);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.brand-mark{
+  width:42px;height:42px;border-radius:14px;
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,197,94,.14));
+  border:1px solid rgba(130,160,200,.15);
+  display:grid;place-items:center;
+  box-shadow: var(--shadow);
+}
+.brand h1{
+  margin:0;
+  font-size:15px;
+  line-height:1.2;
+  letter-spacing:.2px;
+}
+.brand p{
+  margin:2px 0 0;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.top-actions{
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+}
+.pill{
+  border:1px solid rgba(130,160,200,.14);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  padding:9px 12px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  box-shadow:none;
+}
+.pill:hover{background:rgba(255,255,255,.06)}
+.pill.primary{
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(96,165,250,.08));
+  border-color:rgba(96,165,250,.3);
+}
+.pill.success{
+  background:linear-gradient(135deg, rgba(34,197,94,.2), rgba(34,197,94,.08));
+  border-color:rgba(34,197,94,.28);
+}
+.pill.danger{
+  background:linear-gradient(135deg, rgba(239,68,68,.18), rgba(239,68,68,.06));
+  border-color:rgba(239,68,68,.26);
+}
+.pill svg{width:16px;height:16px}
+
+.workspace{
+  display:grid;
+  grid-template-columns: 1.25fr .95fr;
+  gap:14px;
+  padding:14px;
+  min-height:0;
+  height:100%;
+}
+
+.card{
+  background:linear-gradient(180deg, rgba(17,27,48,.92), rgba(10,16,30,.96));
+  border:1px solid rgba(130,160,200,.12);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow);
+  min-height:0;
+  overflow:hidden;
+}
+
+.left,
+.right{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
+.card-head{
+  padding:14px 16px 12px;
+  border-bottom:1px solid rgba(130,160,200,.12);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.card-head h2{
+  margin:0;
+  font-size:14px;
+  letter-spacing:.2px;
+}
+.card-head p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:12px;
+}
+.head-actions{
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+}
+.chip{
+  padding:7px 10px;
+  border-radius:999px;
+  background:var(--chip);
+  border:1px solid rgba(130,160,200,.12);
+  color:var(--text);
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.chip b{font-weight:600}
+
+.toolbar{
+  padding:12px 14px;
+  border-bottom:1px solid rgba(130,160,200,.12);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.row.tight{gap:6px}
+.row label{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.input{
+  width:100%;
+  border:1px solid rgba(130,160,200,.14);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:12px;
+  outline:none;
+  padding:11px 12px;
+  min-height:42px;
+}
+.input:focus{
+  border-color:rgba(96,165,250,.4);
+  box-shadow:0 0 0 3px rgba(96,165,250,.10);
+}
+
+.small-input{
+  max-width:220px;
+}
+
+.section-title{
+  font-size:12px;
+  color:var(--muted);
+  margin:0 0 6px;
+  letter-spacing:.2px;
+  text-transform:uppercase;
+}
+
+.bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.toolbar-btn{
+  border:1px solid rgba(130,160,200,.14);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  padding:8px 10px;
+  border-radius:10px;
+  font-size:12px;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+}
+.toolbar-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+.toolbar-btn.mono{font-family:var(--mono)}
+.toolbar-btn.accent{border-color:rgba(96,165,250,.25)}
+.toolbar-btn.green{border-color:rgba(34,197,94,.25)}
+.toolbar-btn.orange{border-color:rgba(245,158,11,.25)}
+.toolbar-btn.red{border-color:rgba(239,68,68,.25)}
+
+.editor-wrap{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  flex:1;
+}
+
+.editor-shell{
+  display:flex;
+  min-height:0;
+  height:100%;
+  flex:1;
+  background:#050a12;
+  border-top:1px solid rgba(130,160,200,.12);
+}
+
+.gutter{
+  width:58px;
+  padding:14px 0 14px 0;
+  overflow:hidden;
+  border-right:1px solid rgba(130,160,200,.10);
+  background:#050a12;
+  color:#5f728f;
+  font-family:var(--mono);
+  font-size:12px;
+  line-height:1.72;
+  text-align:right;
+  user-select:none;
+}
+.gutter-line{
+  padding:0 10px 0 0;
+  height:21px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+}
+.gutter-line.error{
+  color:#fecaca;
+  background:rgba(239,68,68,.11);
+}
+.gutter-line.warn{
+  color:#fde68a;
+  background:rgba(245,158,11,.10);
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;
+  background:transparent;
+}
+.gutter-line.error .dot{background:var(--danger)}
+.gutter-line.warn .dot{background:var(--warning)}
+
+.editor{
+  flex:1;
+  width:100%;
+  border:0;
+  outline:none;
+  resize:none;
+  background:#050a12;
+  color:#d4e2ff;
+  padding:14px 14px 14px 12px;
+  line-height:1.72;
+  font-size:13px;
+  font-family:var(--mono);
+  tab-size:2;
+  white-space:pre;
+  overflow:auto;
+}
+
+.footer-actions{
+  padding:12px 14px 14px;
+  border-top:1px solid rgba(130,160,200,.12);
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.cta{
+  border:none;
+  border-radius:12px;
+  padding:11px 14px;
+  font-weight:600;
+  color:#08111f;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.cta svg{width:16px;height:16px}
+.cta.generate{background:linear-gradient(135deg, #7dd3fc, #60a5fa)}
+.cta.download{background:linear-gradient(135deg, #86efac, #22c55e)}
+.cta.secondary{
+  color:var(--text);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(130,160,200,.14);
+}
+.cta:hover{filter:brightness(1.03)}
+
+.preview-top{
+  padding:12px 14px;
+  border-bottom:1px solid rgba(130,160,200,.12);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.preview-top .stats{
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+
+.tree-area{
+  padding:12px 10px 12px 12px;
+  overflow:auto;
+  min-height:0;
+  flex:1;
+}
+
+.tree{
+  font-size:13px;
+}
+.tree details{
+  margin:0;
+}
+.tree summary{
+  list-style:none;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  padding:7px 8px;
+  border-radius:10px;
+  border:1px solid transparent;
+}
+.tree summary:hover{
+  background:rgba(255,255,255,.04);
+  border-color:rgba(130,160,200,.10);
+}
+.tree summary::-webkit-details-marker{display:none}
+.twist{
+  width:16px;
+  flex:0 0 16px;
+  display:grid;
+  place-items:center;
+  color:var(--muted);
+}
+.node-name{
+  font-family:var(--mono);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.node-meta{
+  color:var(--muted);
+  font-size:11px;
+  margin-left:auto;
+}
+
+.file-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 8px 7px 34px;
+  border-radius:10px;
+}
+.file-row:hover{
+  background:rgba(255,255,255,.04);
+}
+.icon-badge{
+  width:18px;height:18px;border-radius:6px;
+  display:grid;place-items:center;
+  background:rgba(96,165,250,.12);
+  color:#93c5fd;
+  flex:0 0 18px;
+}
+.icon-badge.folder{
+  background:rgba(245,158,11,.12);
+  color:#fbbf24;
+}
+
+.children{
+  margin-left:14px;
+  border-left:1px dashed rgba(130,160,200,.12);
+  padding-left:10px;
+}
+
+.issues{
+  border-top:1px solid rgba(130,160,200,.12);
+  padding:12px 14px 14px;
+  max-height:220px;
+  overflow:auto;
+}
+.issue-list{
+  margin-top:8px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.issue{
+  border:1px solid rgba(130,160,200,.12);
+  background:rgba(255,255,255,.03);
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:12px;
+  line-height:1.5;
+}
+.issue.error{border-color:rgba(239,68,68,.26)}
+.issue.warn{border-color:rgba(245,158,11,.26)}
+.issue .ln{
+  color:var(--muted);
+  font-family:var(--mono);
+  font-size:11px;
+  margin-bottom:4px;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.74);
+  backdrop-filter:blur(12px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:30;
+}
+.modal.show{display:flex}
+.modal-card{
+  width:min(980px, 100%);
+  max-height:min(84vh, 920px);
+  background:linear-gradient(180deg, rgba(17,27,48,.98), rgba(10,16,30,.98));
+  border:1px solid rgba(130,160,200,.16);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+}
+.modal-head{
+  padding:14px 16px;
+  border-bottom:1px solid rgba(130,160,200,.12);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.modal-head h3{margin:0;font-size:15px}
+.modal-body{
+  padding:14px;
+  overflow:auto;
+  min-height:0;
+}
+.license-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+  gap:10px;
+}
+.license-item{
+  border:1px solid rgba(130,160,200,.12);
+  background:rgba(255,255,255,.03);
+  border-radius:14px;
+  padding:12px;
+  text-align:left;
+  color:var(--text);
+}
+.license-item:hover{
+  background:rgba(255,255,255,.055);
+  border-color:rgba(96,165,250,.28);
+}
+.license-item b{
+  display:block;
+  margin-bottom:4px;
+  font-size:13px;
+}
+.license-item span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+.modal-footer{
+  padding:12px 16px 16px;
+  border-top:1px solid rgba(130,160,200,.12);
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.license-preview{
+  margin-top:12px;
+  border:1px solid rgba(130,160,200,.12);
+  background:#081020;
+  border-radius:14px;
+  padding:12px;
+  color:#d9e6fb;
+  font-family:var(--mono);
+  font-size:12px;
+  line-height:1.6;
+  white-space:pre-wrap;
+  max-height:220px;
+  overflow:auto;
+}
+.empty{
+  color:var(--muted);
+  font-size:13px;
+  padding:14px 8px;
+}
+
+.kbd{
+  font-family:var(--mono);
+  font-size:11px;
+  padding:2px 7px;
+  border:1px solid rgba(130,160,200,.18);
+  border-bottom-color:rgba(130,160,200,.28);
+  border-radius:7px;
+  color:var(--muted);
+  background:rgba(255,255,255,.03);
+}
+.split-note{
+  color:var(--muted);
+  font-size:12px;
+}
+
+@media (max-width: 1120px){
+  body{overflow:auto}
+  .workspace{grid-template-columns:1fr; height:auto}
+  .editor{min-height:360px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <path d="M8 7h8M8 12h8M8 17h8"/>
+          <path d="M4 5h16v14H4z" opacity=".4"/>
+        </svg>
+      </div>
+      <div>
+        <h1>ASCII Tree → ZIP Studio</h1>
+        <p>Minimal SaaS-style project generator with snippets, validation, and license import</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="pill" id="btnExpandAll" title="Expand all folders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Expand all
+      </button>
+      <button class="pill" id="btnCollapseAll" title="Collapse all folders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>
+        Collapse all
+      </button>
+      <button class="pill primary" id="btnLicense">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/>
+        </svg>
+        License
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <section class="card left">
+      <div class="card-head">
+        <div>
+          <h2>Editor</h2>
+          <p>Type ASCII tree, add shortcuts, choose a snippet, and set your root folder.</p>
+        </div>
+        <div class="head-actions">
+          <span class="chip"><b id="statFiles">0</b> files</span>
+          <span class="chip"><b id="statFolders">0</b> folders</span>
+          <span class="chip"><b id="statIssues">0</b> issues</span>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <label>Root folder name</label>
+            <input id="rootName" class="input small-input" placeholder='root' value="root" />
+          </div>
+          <div style="flex:1; min-width:260px;">
+            <label>Project title</label>
+            <input id="projectTitle" class="input" placeholder='My SaaS Tool' value="Project Structure" />
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">ASCII helpers</div>
+          <div class="bar" id="asciiButtons"></div>
+        </div>
+
+        <div>
+          <div class="section-title">Most used file types</div>
+          <div class="bar" id="extButtons"></div>
+        </div>
+
+        <div>
+          <div class="section-title">Built-in snippets</div>
+          <div class="bar" id="snippetButtons"></div>
+        </div>
+
+        <div class="row tight">
+          <button class="toolbar-btn mono accent" data-ins="├── ">├──</button>
+          <button class="toolbar-btn mono accent" data-ins="└── ">└──</button>
+          <button class="toolbar-btn mono accent" data-ins="│   ">│</button>
+          <button class="toolbar-btn mono accent" data-ins="    ">space indent</button>
+          <button class="toolbar-btn mono" data-ins="# "># comment</button>
+          <button class="toolbar-btn mono" data-ins="LICENSE">LICENSE</button>
+          <button class="toolbar-btn mono" data-ins="README.md">README.md</button>
+          <button class="toolbar-btn mono" data-ins=".json">.json</button>
+          <button class="toolbar-btn mono" data-ins=".md">.md</button>
+        </div>
+      </div>
+
+      <div class="editor-wrap">
+        <div class="editor-shell">
+          <div id="gutter" class="gutter"></div>
+          <textarea id="editor" class="editor" spellcheck="false" placeholder="Write your ASCII tree here..."></textarea>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button class="cta generate" id="btnGenerate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14"/>
+            <path d="M12 5l7 7-7 7"/>
+          </svg>
+          Generate preview
+        </button>
+        <button class="cta secondary" id="btnInsertLicense">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/>
+          </svg>
+          Add license item
+        </button>
+      </div>
+    </section>
+
+    <section class="card right">
+      <div class="card-head">
+        <div>
+          <h2>Preview</h2>
+          <p>Expandable structure preview with validation and ZIP download.</p>
+        </div>
+        <div class="head-actions">
+          <span class="chip">Selected: <b id="selectedLicenseLabel">none</b></span>
+          <span class="chip">Mode: <b>SaaS</b></span>
+        </div>
+      </div>
+
+      <div class="preview-top">
+        <div class="stats">
+          <span class="chip">Root: <b id="previewRoot">root</b></span>
+          <span class="chip">Ready: <b id="readyState">no</b></span>
+        </div>
+        <div class="split-note">Click folders to collapse / expand</div>
+      </div>
+
+      <div class="tree-area">
+        <div id="preview" class="tree"></div>
+      </div>
+
+      <div class="issues">
+        <div class="section-title" style="margin-bottom:0;">Issues</div>
+        <div id="issueList" class="issue-list"></div>
+      </div>
+
+      <div class="footer-actions">
+        <button class="cta download" id="btnDownload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3v12"/>
+            <path d="M7 10l5 5 5-5"/>
+            <path d="M5 21h14"/>
+          </svg>
+          Download ZIP
+        </button>
+        <button class="cta secondary" id="btnLoadDemo">Load demo</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- LICENSE MODAL -->
+<div class="modal" id="licenseModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h3>Choose a license</h3>
+        <div style="color:var(--muted);font-size:12px;margin-top:4px;">
+          Loads popular license templates from GitHub and inserts the selected license file into your structure.
+        </div>
+      </div>
+      <button class="pill danger" id="btnCloseModal">Close</button>
+    </div>
+
+    <div class="modal-body">
+      <input id="licenseSearch" class="input" placeholder="Search licenses by name or SPDX id..." />
+      <div id="licenseStatus" style="margin-top:10px;color:var(--muted);font-size:12px;"></div>
+      <div class="license-grid" id="licenseGrid" style="margin-top:12px;"></div>
+      <div id="licensePreview" class="license-preview" style="display:none;"></div>
+    </div>
+
+    <div class="modal-footer">
+      <div style="color:var(--muted);font-size:12px;">
+        Selected license will be added as <span class="kbd">LICENSE</span> at the project root.
+      </div>
+      <div class="row tight">
+        <button class="pill" id="btnRefreshLicenses">Refresh list</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+(() => {
+  const editor = document.getElementById('editor');
+  const gutter = document.getElementById('gutter');
+  const preview = document.getElementById('preview');
+  const issueList = document.getElementById('issueList');
+  const rootNameInput = document.getElementById('rootName');
+  const projectTitleInput = document.getElementById('projectTitle');
+
+  const statFiles = document.getElementById('statFiles');
+  const statFolders = document.getElementById('statFolders');
+  const statIssues = document.getElementById('statIssues');
+  const previewRoot = document.getElementById('previewRoot');
+  const readyState = document.getElementById('readyState');
+  const selectedLicenseLabel = document.getElementById('selectedLicenseLabel');
+
+  const licenseModal = document.getElementById('licenseModal');
+  const licenseSearch = document.getElementById('licenseSearch');
+  const licenseGrid = document.getElementById('licenseGrid');
+  const licenseStatus = document.getElementById('licenseStatus');
+  const licensePreview = document.getElementById('licensePreview');
+
+  const githubLicenseListURL = 'https://api.github.com/licenses';
+  const githubLicenseOneURL = key => `https://api.github.com/licenses/${encodeURIComponent(key)}`;
+
+  const specialFiles = new Map();
+  let parsedModel = null;
+  let cachedLicenses = null;
+  let selectedLicense = null;
+  let parseTimer = null;
+
+  const snippets = {
+    react: {
+      label: 'React App',
+      text:
+`src/
+├── App.jsx
+├── main.jsx
+├── index.css
+├── components/
+│   └── Navbar.jsx
+└── assets/
+    └── logo.svg
+public/
+├── favicon.svg
+└── vite.svg
+package.json
+README.md`
+    },
+    webapp: {
+      label: 'Web App',
+      text:
+`assets/
+├── icons/
+│   └── app.svg
+├── images/
+│   └── hero.png
+├── styles/
+│   └── main.css
+├── scripts/
+│   └── app.js
+├── index.html
+└── manifest.json`
+    },
+    pwa: {
+      label: 'PWA',
+      text:
+`src/
+├── app.js
+├── sw.js
+├── styles.css
+├── manifest.json
+├── icons/
+│   ├── icon-192.png
+│   └── icon-512.png
+└── pages/
+    └── offline.html
+index.html`
+    },
+    github: {
+      label: 'GitHub Repo',
+      text:
+`.github/
+├── workflows/
+│   └── ci.yml
+├── ISSUE_TEMPLATE/
+│   └── bug_report.md
+├── pull_request_template.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── LICENSE
+├── README.md
+└── .gitignore`
+    },
+    vercel: {
+      label: 'Vercel Project',
+      text:
+`public/
+├── favicon.svg
+└── vercel.svg
+src/
+├── app/
+│   ├── layout.jsx
+│   └── page.jsx
+├── components/
+│   └── Hero.jsx
+├── styles/
+│   └── globals.css
+├── lib/
+│   └── utils.js
+└── middleware.js
+vercel.json
+package.json
+README.md`
+    },
+    python: {
+      label: 'Python Project',
+      text:
+`app/
+├── __init__.py
+├── main.py
+├── config.py
+├── utils/
+│   └── helper.py
+tests/
+├── test_app.py
+requirements.txt
+README.md`
+    },
+    extension: {
+      label: 'Browser Extension',
+      text:
+`extension/
+├── manifest.json
+├── popup.html
+├── popup.js
+├── background.js
+├── content.js
+├── options/
+│   └── options.html
+└── icons/
+    ├── icon16.png
+    ├── icon48.png
+    └── icon128.png`
+    },
+    node: {
+      label: 'Node API',
+      text:
+`src/
+├── server.js
+├── routes/
+│   └── api.js
+├── controllers/
+│   └── home.js
+├── middleware/
+│   └── error.js
+└── utils/
+    └── logger.js
+package.json
+README.md`
+    },
+    next: {
+      label: 'Next.js App',
+      text:
+`app/
+├── layout.jsx
+├── page.jsx
+├── globals.css
+├── components/
+│   └── Header.jsx
+└── api/
+    └── route.js
+public/
+└── logo.svg
+next.config.js
+package.json`
+    },
+    vite: {
+      label: 'Vite App',
+      text:
+`src/
+├── main.js
+├── style.css
+├── components/
+│   └── App.jsx
+└── assets/
+    └── logo.svg
+index.html
+vite.config.js
+package.json`
+    }
+  };
+
+  const asciiShortcuts = [
+    ['├── ', '├──'],
+    ['└── ', '└──'],
+    ['│   ', '│'],
+    ['    ', 'spaces'],
+    ['# ', '# comment'],
+    ['── ', '──'],
+    ['/\\n', 'folder/'],
+    ['LICENSE', 'LICENSE'],
+    ['README.md', 'README'],
+  ];
+
+  const extShortcuts = [
+    '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs',
+    '.html', '.css', '.scss', '.json', '.md', '.yml',
+    '.yaml', '.py', '.java', '.cpp', '.c', '.cs',
+    '.php', '.go', '.rb', '.rs', '.sh', '.sql',
+    '.xml', '.svg', '.env', '.txt'
+  ];
+
+  function el(tag, attrs = {}, children = []) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'className') node.className = v;
+      else if (k === 'text') node.textContent = v;
+      else if (k === 'html') node.innerHTML = v;
+      else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
+      else node.setAttribute(k, v);
+    }
+    for (const child of children) node.append(child);
+    return node;
+  }
+
+  function setLines() {
+    const count = editor.value.replace(/\r/g, '').split('\n').length;
+    const frag = document.createDocumentFragment();
+    const issueMap = new Map((parsedModel?.issues || []).map(i => [i.line, i]));
+    for (let i = 1; i <= count; i++) {
+      const issue = issueMap.get(i);
+      const line = el('div', {
+        className: `gutter-line ${issue?.severity || ''}`.trim()
+      }, [
+        el('span', { className: 'dot' }),
+        el('span', { text: String(i) })
+      ]);
+      frag.appendChild(line);
+    }
+    gutter.innerHTML = '';
+    gutter.appendChild(frag);
+  }
+
+  function insertAtCursor(text) {
+    const start = editor.selectionStart ?? editor.value.length;
+    const end = editor.selectionEnd ?? editor.value.length;
+    const before = editor.value.slice(0, start);
+    const after = editor.value.slice(end);
+    editor.value = before + text + after;
+    const pos = start + text.length;
+    editor.selectionStart = editor.selectionEnd = pos;
+    editor.focus();
+    setLines();
+  }
+
+  function insertSnippet(text) {
+    editor.value = text;
+    editor.focus();
+    setLines();
+    generatePreview();
+  }
+
+  function rootName() {
+    return (rootNameInput.value || '').trim() || 'root';
+  }
+
+  function isComment(line) {
+    return line.trim().startsWith('#');
+  }
+
+  function countIndentGroups(line) {
+    let depth = 0;
+    let i = 0;
+    while (i + 4 <= line.length) {
+      const chunk = line.slice(i, i + 4);
+      if (chunk === '│   ' || chunk === '    ') {
+        depth += 1;
+        i += 4;
+      } else {
+        break;
+      }
+    }
+    return { depth, rest: line.slice(i) };
+  }
+
+  function stripBranch(rest) {
+    return rest.replace(/^[├└]──\s*/, '').replace(/^──\s*/, '').trim();
+  }
+
+  function detectExplicitRoot(lines) {
+    const firstMeaningful = lines.findIndex(l => l.trim() && !isComment(l));
+    if (firstMeaningful < 0) return null;
+    const line = lines[firstMeaningful];
+    const { depth, rest } = countIndentGroups(line);
+    const cleaned = stripBranch(rest);
+    const plain = line.trim();
+    if (depth === 0 && cleaned && /^.+\/$/.test(plain) && !plain.startsWith('├') && !plain.startsWith('└')) {
+      return cleaned.replace(/\/$/, '').trim();
+    }
+    return null;
+  }
+
+  function parseAscii(text) {
+    const lines = text.replace(/\r/g, '').split('\n');
+    const issues = [];
+    const rootLabel = detectExplicitRoot(lines) || rootName();
+    const root = {
+      name: rootLabel,
+      type: 'folder',
+      children: [],
+      line: 0,
+      path: rootLabel
+    };
+
+    const hasExplicitRoot = detectExplicitRoot(lines) !== null;
+    const startIndex = hasExplicitRoot
+      ? lines.findIndex(l => l.trim() && !isComment(l)) + 1
+      : 0;
+
+    const stack = [{ node: root, depth: -1 }];
+    const siblingKeys = new Map();
+    let fileCount = 0;
+    let folderCount = 1;
+
+    for (let i = startIndex; i < lines.length; i++) {
+      const raw = lines[i];
+      const lineNo = i + 1;
+      if (!raw.trim()) continue;
+      if (isComment(raw)) continue;
+
+      const { depth: prefixDepth, rest } = countIndentGroups(raw);
+      const depth = prefixDepth + (hasExplicitRoot ? 1 : 0);
+      const cleaned = stripBranch(rest);
+
+      if (!cleaned) {
+        issues.push({ line: lineNo, severity: 'error', message: 'Empty node name.' });
+        continue;
+      }
+
+      if (depth > stack[stack.length - 1].depth + 1) {
+        issues.push({
+          line: lineNo,
+          severity: 'error',
+          message: 'Indent jumps too far. Add a parent folder before this line.'
+        });
+      }
+
+      while (stack.length && stack[stack.length - 1].depth >= depth) stack.pop();
+      const parent = stack[stack.length - 1]?.node || root;
+
+      const isFolder = /\/$/.test(cleaned);
+      const name = isFolder ? cleaned.replace(/\/$/, '') : cleaned;
+
+      if (!name.trim()) {
+        issues.push({ line: lineNo, severity: 'error', message: 'Invalid node name.' });
+        continue;
+      }
+
+      const parentKey = parent.path || parent.name;
+      if (!siblingKeys.has(parentKey)) siblingKeys.set(parentKey, new Set());
+      const keySet = siblingKeys.get(parentKey);
+
+      if (keySet.has(name)) {
+        issues.push({
+          line: lineNo,
+          severity: 'warn',
+          message: `Duplicate entry under "${parent.name}": ${name}`
+        });
+      } else {
+        keySet.add(name);
+      }
+
+      const node = {
+        name,
+        type: isFolder ? 'folder' : 'file',
+        children: [],
+        line: lineNo,
+        path: parent.path ? `${parent.path}/${name}` : name
+      };
+
+      parent.children.push(node);
+
+      if (isFolder) {
+        folderCount += 1;
+        stack.push({ node, depth });
+      } else {
+        fileCount += 1;
+      }
+    }
+
+    return {
+      root,
+      issues,
+      stats: { fileCount, folderCount, issueCount: issues.length },
+      ready: issues.filter(x => x.severity === 'error').length === 0
+    };
+  }
+
+  function renderTree(node) {
+    if (node.type === 'file') {
+      const row = el('div', { className: 'file-row' }, [
+        el('span', { className: 'icon-badge', html: '📄' }),
+        el('span', { className: 'node-name', text: node.name }),
+        el('span', { className: 'node-meta', text: `L${node.line || ''}` })
+      ]);
+      return row;
+    }
+
+    const details = el('details', { open: node.depth === 0 || node.isRoot ? 'open' : null });
+    const summary = el('summary', {}, [
+      el('span', { className: 'twist', html: '▾' }),
+      el('span', { className: 'icon-badge folder', html: '📁' }),
+      el('span', { className: 'node-name', text: node.name }),
+      el('span', { className: 'node-meta', text: `${node.children.length} item${node.children.length === 1 ? '' : 's'}` })
+    ]);
+
+    const kids = el('div', { className: 'children' });
+    for (const child of node.children) {
+      kids.appendChild(renderTree(child));
+    }
+
+    summary.addEventListener('click', (e) => {
+      const hasKids = node.children.length > 0;
+      if (!hasKids) return;
+      requestAnimationFrame(() => {
+        const twist = summary.querySelector('.twist');
+        twist.textContent = details.open ? '▾' : '▸';
+      });
+    });
+
+    details.append(summary, kids);
+    return details;
+  }
+
+  function buildZipFromNode(zip, node) {
+    const currentFolder = zip.folder(node.name);
+    for (const child of node.children) {
+      if (child.type === 'folder') {
+        buildZipFromNode(currentFolder, child);
+      } else {
+        const filePath = `${child.path}`.replace(new RegExp(`^${escapeRegExp(node.path)}/?`), '');
+        const content = specialFiles.get(child.path) ?? '';
+        currentFolder.file(filePath, content);
+      }
+    }
+  }
+
+  function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function renderIssues(issues) {
+    issueList.innerHTML = '';
+    if (!issues.length) {
+      issueList.appendChild(el('div', { className: 'empty', text: 'No issues found.' }));
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    for (const issue of issues) {
+      frag.appendChild(
+        el('div', { className: `issue ${issue.severity}` }, [
+          el('div', { className: 'ln', text: `Line ${issue.line}` }),
+          el('div', { text: issue.message })
+        ])
+      );
+    }
+    issueList.appendChild(frag);
+  }
+
+  function generatePreview() {
+    parsedModel = parseAscii(editor.value);
+    preview.innerHTML = '';
+
+    previewRoot.textContent = parsedModel.root.name;
+    readyState.textContent = parsedModel.ready ? 'yes' : 'no';
+    statFiles.textContent = parsedModel.stats.fileCount;
+    statFolders.textContent = parsedModel.stats.folderCount;
+    statIssues.textContent = parsedModel.stats.issueCount;
+
+    if (parsedModel.ready) {
+      const rootNode = parsedModel.root;
+      rootNode.isRoot = true;
+      rootNode.depth = 0;
+      preview.appendChild(renderTree(rootNode));
+    } else {
+      preview.appendChild(el('div', { className: 'empty', text: 'Fix the issues below to render the preview.' }));
+    }
+
+    renderIssues(parsedModel.issues);
+    setLines();
+  }
+
+  async function downloadZip() {
+    if (!parsedModel) generatePreview();
+    if (!parsedModel.ready) {
+      alert('Fix preview errors before downloading the ZIP.');
+      return;
+    }
+
+    const zip = new JSZip();
+    const root = parsedModel.root;
+    const rootFolder = zip.folder(root.name);
+
+    for (const child of root.children) {
+      if (child.type === 'folder') {
+        addNodeToZip(rootFolder, child);
+      } else {
+        rootFolder.file(child.name, specialFiles.get(child.path) ?? '');
+      }
+    }
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${root.name}.zip`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function addNodeToZip(zipFolder, node) {
+    const folder = zipFolder.folder(node.name);
+    for (const child of node.children) {
+      if (child.type === 'folder') {
+        addNodeToZip(folder, child);
+      } else {
+        folder.file(child.name, specialFiles.get(child.path) ?? '');
+      }
+    }
+  }
+
+  function updateTwistIcons() {
+    document.querySelectorAll('.tree details').forEach(details => {
+      const twist = details.querySelector('.twist');
+      if (twist) twist.textContent = details.open ? '▾' : '▸';
+    });
+  }
+
+  function openLicenseModal() {
+    licenseModal.classList.add('show');
+    licenseModal.setAttribute('aria-hidden', 'false');
+    licenseSearch.value = '';
+    licensePreview.style.display = 'none';
+    licenseStatus.textContent = cachedLicenses ? 'Choose a license from the list below.' : 'Loading popular licenses...';
+    if (cachedLicenses) {
+      renderLicenseList(cachedLicenses);
+    } else {
+      loadLicenses();
+    }
+  }
+
+  function closeLicenseModal() {
+    licenseModal.classList.remove('show');
+    licenseModal.setAttribute('aria-hidden', 'true');
+  }
+
+  async function loadLicenses() {
+    try {
+      const res = await fetch(githubLicenseListURL, {
+        headers: { Accept: 'application/vnd.github+json' }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      cachedLicenses = Array.isArray(data) ? data : [];
+      licenseStatus.textContent = `Loaded ${cachedLicenses.length} licenses from GitHub.`;
+      renderLicenseList(cachedLicenses);
+    } catch (err) {
+      licenseStatus.textContent = 'Could not load licenses from GitHub right now.';
+      cachedLicenses = [];
+      renderLicenseList([]);
+    }
+  }
+
+  function renderLicenseList(list) {
+    const query = (licenseSearch.value || '').trim().toLowerCase();
+    const filtered = list.filter(item => {
+      const name = (item.name || '').toLowerCase();
+      const key = (item.key || '').toLowerCase();
+      const spdx = (item.spdx_id || '').toLowerCase();
+      return !query || name.includes(query) || key.includes(query) || spdx.includes(query);
+    });
+
+    licenseGrid.innerHTML = '';
+
+    if (!filtered.length) {
+      licenseGrid.appendChild(el('div', { className: 'empty', text: 'No matching license found.' }));
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    filtered.forEach(item => {
+      const btn = el('button', { className: 'license-item' }, [
+        el('b', { text: item.name || item.spdx_id || item.key }),
+        el('span', { text: `SPDX: ${item.spdx_id || 'n/a'}` }),
+        el('span', { text: item.key ? `Key: ${item.key}` : '' })
+      ]);
+
+      btn.addEventListener('click', async () => {
+        await chooseLicense(item);
+      });
+      frag.appendChild(btn);
+    });
+
+    licenseGrid.appendChild(frag);
+  }
+
+  async function chooseLicense(item) {
+    try {
+      licenseStatus.textContent = `Loading ${item.name}...`;
+      const res = await fetch(githubLicenseOneURL(item.key || item.spdx_id), {
+        headers: { Accept: 'application/vnd.github+json' }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const detail = await res.json();
+
+      const body = detail.body || '';
+      const licenseLabel = detail.spdx_id || detail.key || item.key || 'LICENSE';
+      selectedLicense = {
+        name: detail.name || item.name || 'License',
+        key: detail.key || item.key || item.spdx_id,
+        spdx_id: detail.spdx_id || item.spdx_id,
+        body
+      };
+
+      selectedLicenseLabel.textContent = selectedLicense.spdx_id || selectedLicense.key || 'selected';
+      licensePreview.style.display = 'block';
+      licensePreview.textContent = body || 'License body not available from the response.';
+      licenseStatus.textContent = `Selected ${selectedLicense.name}.`;
+
+      insertOrReplaceLicenseLine();
+      specialFiles.set(`${rootName()}/LICENSE`, body);
+
+      closeLicenseModal();
+      generatePreview();
+    } catch (err) {
+      licenseStatus.textContent = 'Failed to load that license. Try another one.';
+    }
+  }
+
+  function insertOrReplaceLicenseLine() {
+    const lines = editor.value.replace(/\r/g, '').split('\n');
+    const firstMeaningful = lines.findIndex(l => l.trim() && !l.trim().startsWith('#'));
+
+    if (firstMeaningful < 0) {
+      editor.value = `├── LICENSE\n`;
+      setLines();
+      return;
+    }
+
+    const alreadyHasLicense = lines.some(l => l.trim().replace(/^[├└]──\s*/, '') === 'LICENSE');
+    if (alreadyHasLicense) {
+      setLines();
+      return;
+    }
+
+    const rootLike = /^\s*[^├└].*\/\s*$/.test(lines[firstMeaningful].trim());
+    if (rootLike) {
+      lines.splice(firstMeaningful + 1, 0, '├── LICENSE');
+    } else {
+      lines.splice(firstMeaningful, 0, '├── LICENSE');
+    }
+
+    editor.value = lines.join('\n');
+    setLines();
+  }
+
+  function loadDemo() {
+    editor.value =
+`src/
+├── app.jsx
+├── main.jsx
+├── styles.css
+├── components/
+│   ├── Navbar.jsx
+│   └── Footer.jsx
+├── pages/
+│   ├── Home.jsx
+│   └── About.jsx
+└── assets/
+    └── logo.svg
+public/
+├── favicon.svg
+└── robots.txt
+package.json
+README.md`;
+    rootNameInput.value = 'root';
+    projectTitleInput.value = 'Project Structure';
+    specialFiles.clear();
+    selectedLicense = null;
+    selectedLicenseLabel.textContent = 'none';
+    setLines();
+    generatePreview();
+  }
+
+  function buildShortcutButtons() {
+    const asciiWrap = document.getElementById('asciiButtons');
+    asciiShortcuts.forEach(([value, label]) => {
+      const btn = el('button', { className: 'toolbar-btn mono accent', text: label });
+      btn.addEventListener('click', () => insertAtCursor(value === '/\\n' ? '/\n' : value));
+      asciiWrap.appendChild(btn);
+    });
+
+    const extWrap = document.getElementById('extButtons');
+    extShortcuts.forEach(ext => {
+      const btn = el('button', { className: 'toolbar-btn mono', text: ext });
+      btn.addEventListener('click', () => insertAtCursor(ext));
+      extWrap.appendChild(btn);
+    });
+
+    const snippetWrap = document.getElementById('snippetButtons');
+    Object.values(snippets).forEach(sn => {
+      const btn = el('button', { className: 'toolbar-btn', text: sn.label });
+      btn.addEventListener('click', () => insertSnippet(sn.text));
+      snippetWrap.appendChild(btn);
+    });
+  }
+
+  function bindToolbarButtons() {
+    document.querySelectorAll('[data-ins]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const value = btn.getAttribute('data-ins');
+        insertAtCursor(value === '/\\n' ? '/\n' : value);
+      });
+    });
+  }
+
+  function expandCollapseAll(open) {
+    document.querySelectorAll('.tree details').forEach(d => {
+      d.open = open;
+      const twist = d.querySelector('.twist');
+      if (twist) twist.textContent = open ? '▾' : '▸';
+    });
+  }
+
+  editor.addEventListener('input', () => {
+    setLines();
+    clearTimeout(parseTimer);
+    parseTimer = setTimeout(() => {
+      generatePreview();
+    }, 180);
+  });
+
+  editor.addEventListener('scroll', () => {
+    gutter.scrollTop = editor.scrollTop;
+  });
+
+  rootNameInput.addEventListener('input', () => {
+    clearTimeout(parseTimer);
+    parseTimer = setTimeout(generatePreview, 160);
+  });
+
+  projectTitleInput.addEventListener('input', () => {
+    document.title = `${projectTitleInput.value || 'ASCII Tree'} → ZIP SaaS Tool`;
+  });
+
+  licenseSearch.addEventListener('input', () => {
+    renderLicenseList(cachedLicenses || []);
+  });
+
+  document.getElementById('btnGenerate').addEventListener('click', generatePreview);
+  document.getElementById('btnDownload').addEventListener('click', downloadZip);
+  document.getElementById('btnLoadDemo').addEventListener('click', loadDemo);
+  document.getElementById('btnLicense').addEventListener('click', openLicenseModal);
+  document.getElementById('btnInsertLicense').addEventListener('click', () => {
+    if (selectedLicense) {
+      insertOrReplaceLicenseLine();
+      generatePreview();
+    } else {
+      openLicenseModal();
+    }
+  });
+  document.getElementById('btnCloseModal').addEventListener('click', closeLicenseModal);
+  document.getElementById('btnRefreshLicenses').addEventListener('click', loadLicenses);
+
+  document.getElementById('btnExpandAll').addEventListener('click', () => expandCollapseAll(true));
+  document.getElementById('btnCollapseAll').addEventListener('click', () => expandCollapseAll(false));
+
+  licenseModal.addEventListener('click', (e) => {
+    if (e.target === licenseModal) closeLicenseModal();
+  });
+
+  buildShortcutButtons();
+  bindToolbarButtons();
+
+  editor.value =
+`src/
+├── app.jsx
+├── main.jsx
+├── styles.css
+├── components/
+│   ├── Navbar.jsx
+│   └── Footer.jsx
+└── assets/
+    └── logo.svg
+public/
+├── favicon.svg
+└── robots.txt
+package.json
+README.md`;
+
+  setLines();
+  generatePreview();
+
+  // expose for buttons
+  window.generatePreview = generatePreview;
+})();
+</script>
+</body>
+</html>
